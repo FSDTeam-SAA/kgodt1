@@ -1,9 +1,11 @@
-import React from 'react'
+import SignInForm from "./_components/sign-in-form";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div className="max-w-xl w-full">
+      <SignInForm />
+    </div>
+  );
+};
 
-export default page
+export default page;

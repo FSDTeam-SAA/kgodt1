@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z
   .object({
@@ -146,7 +147,7 @@ const SignUpForm = () => {
               <FormItem>
                 <FormLabel className="text-primary">Password</FormLabel>
                 <FormControl>
-                  <Input
+                  <PasswordInput
                     placeholder="Enter Password"
                     {...field}
                     className="h-[50px] bg-[#eaeaea] "
@@ -164,7 +165,7 @@ const SignUpForm = () => {
               <FormItem>
                 <FormLabel className="text-primary">Confirm Password</FormLabel>
                 <FormControl>
-                  <Input
+                  <PasswordInput
                     placeholder="Confirm Password"
                     {...field}
                     className="h-[50px] bg-[#eaeaea] "
@@ -203,6 +204,15 @@ const SignUpForm = () => {
           <Button type="submit" className="w-full h-[50px]">
             Submit
           </Button>
+
+          <div>
+            <p>
+              Already have an account ? Please{" "}
+              <Link href={'/sign-in'} className="text-primary font-bold underline">
+                <span>Sign In</span>.
+              </Link>
+            </p>
+          </div>
         </form>
       </Form>
     </div>
