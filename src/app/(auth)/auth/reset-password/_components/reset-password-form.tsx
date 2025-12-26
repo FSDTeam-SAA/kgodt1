@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import ResetSuccessModal from "./reset-success-modal";
+import { useState } from "react";
 
 const formSchema = z
   .object({
@@ -31,6 +33,8 @@ const formSchema = z
 type FormType = z.infer<typeof formSchema>;
 
 const ResetPasswordForm = () => {
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -42,6 +46,7 @@ const ResetPasswordForm = () => {
 
   function onSubmit(values: FormType) {
     console.log(values);
+    setIsSuccessModalOpen(true);
   }
 
   return (
@@ -106,6 +111,13 @@ const ResetPasswordForm = () => {
           </Button>
         </form>
       </Form>
+
+      {
+        <ResetSuccessModal
+          isOpen={isSuccessModalOpen}
+          onClose={() => setIsSuccessModalOpen(false)}
+        />
+      }
     </div>
   );
 };
