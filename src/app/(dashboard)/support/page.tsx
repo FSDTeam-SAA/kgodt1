@@ -1,17 +1,17 @@
 import AppTopBar from "@/components/shared/app-topbar";
 import React from "react";
-import { DocumentForm } from "./_components/document-form";
+import SupportComponent from "./_components/support-compnent";
 
 const page = () => {
   return (
     <div className="space-y-8">
       <AppTopBar
-        title="New Session"
-        desc="Upload clinical notes for a single resident. Files are processed temporarily and not stored."
+        title="Support"
+        desc="Get help with MDS documentation workflows and application support."
       />
 
       <div>
-        <DocumentForm />
+        <SupportComponent />
       </div>
     </div>
   );

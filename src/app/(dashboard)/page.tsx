@@ -1,9 +1,28 @@
-import React from 'react'
+import React from "react";
+import States from "./_components/states";
+import AppTopBar from "@/components/shared/app-topbar";
+import SessionTable from "./_components/session-table";
+import OverviewFooter from "./_components/overview-footer";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div className="space-y-8">
+      <AppTopBar
+        title="Welcome back to MDS-AI"
+        desc="Review your recent sessions and start a new one anytime."
+      />
+      <States />
 
-export default page
+      <div className="min-h-[500px]">
+        <h1 className="text-xl">Recent Session Table</h1>
+        <div className="mt-2">
+          <SessionTable />
+        </div>
+      </div>
+
+      <OverviewFooter />
+    </div>
+  );
+};
+
+export default page;
