@@ -1,3 +1,5 @@
+"use client";
+import CustomPagination from "@/components/shared/custom-pagination";
 import {
   Table,
   TableBody,
@@ -7,14 +9,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Download, Eye } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 const SessionTable = () => {
   const tableHeaderClass = "text-center text-white font-medium";
   const tableRowClass = "h-[50px] text-center opacity-70 font-medium";
 
+  const [currentPage, setCurrentPage] = useState(1);
+
   return (
-    <div>
+    <div className="space-y-8">
       <div className="overflow-hidden rounded-lg border border-gray-200">
         <Table>
           <TableHeader className="bg-primary hover:bg-primary/90 h-[50px]">
@@ -102,6 +106,20 @@ const SessionTable = () => {
             </TableRow>
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="opacity-60">Showing 1 to 5 of 12 results</h1>
+        </div>
+
+        <div>
+          <CustomPagination
+            currentPage={currentPage}
+            onPageChange={() => setCurrentPage(5)}
+            totalPages={5}
+          />
+        </div>
       </div>
     </div>
   );
