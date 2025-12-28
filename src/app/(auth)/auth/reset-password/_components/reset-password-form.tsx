@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import ResetSuccessModal from "./reset-success-modal";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
@@ -39,7 +39,6 @@ type FormType = z.infer<typeof formSchema>;
 const ResetPasswordForm = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -83,9 +82,8 @@ const ResetPasswordForm = () => {
       return await data;
     },
 
-    onSuccess: async (data) => {
-      toast.success(data?.message);
-      router.push(`/auth/sign-in`);
+    onSuccess: async () => {
+      setIsSuccessModalOpen(true);
     },
 
     onError: async (error) => {
