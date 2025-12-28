@@ -14,18 +14,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import ResetSuccessModal from "./reset-success-modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z
   .object({
-    password: z
+    newPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters." }),
     confirmPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters." }),
   })
-  .refine((value) => value.password === value.confirmPassword, {
+  .refine((value) => value.newPassword === value.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
@@ -34,19 +38,65 @@ type FormType = z.infer<typeof formSchema>;
 
 const ResetPasswordForm = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(decodeURIComponent(emailParam));
+    }
+  }, [searchParams]);
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      password: "",
+      newPassword: "",
       confirmPassword: "",
     },
   });
 
-  function onSubmit(values: FormType) {
-    console.log(values);
-    setIsSuccessModalOpen(true);
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: ["reset-password"],
+    mutationFn: async (payload: FormType) => {
+      const requestBody = email ? { ...payload, email } : payload;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Something went wrong");
+      }
+
+      return await data;
+    },
+
+    onSuccess: async () => {
+      setIsSuccessModalOpen(true);
+    },
+
+    onError: async (error) => {
+      toast.error(error?.message);
+    },
+  });
+
+  async function onSubmit(payload: FormType) {
+    try {
+      await mutateAsync(payload);
+    } catch (error) {
+      console.log(`error : ${error}`);
+    }
   }
 
   return (
@@ -71,7 +121,7 @@ const ResetPasswordForm = () => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
-            name="password"
+            name="newPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-primary">New Password</FormLabel>
@@ -106,8 +156,23 @@ const ResetPasswordForm = () => {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full h-[50px]">
-            Continue
+
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full h-[50px] disabled:cursor-not-allowed"
+          >
+            {isPending ? (
+              <span className="flex items-center gap-1">
+                <span>
+                  <Spinner />
+                </span>
+
+                <span>Continue</span>
+              </span>
+            ) : (
+              `Continue`
+            )}
           </Button>
         </form>
       </Form>
