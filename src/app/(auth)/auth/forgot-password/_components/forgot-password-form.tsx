@@ -14,6 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -22,6 +26,8 @@ const formSchema = z.object({
 type FormType = z.infer<typeof formSchema>;
 
 const ForgotPasswordForm = () => {
+  const router = useRouter();
+
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -30,8 +36,46 @@ const ForgotPasswordForm = () => {
     },
   });
 
-  function onSubmit(values: FormType) {
-    console.log(values);
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: ["forgot-password"],
+    mutationFn: async (payload: FormType) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Something went wrong");
+      }
+
+      return await data;
+    },
+
+    onSuccess: async (data, variables) => {
+      toast.success(data?.message);
+      const encodedEmail = encodeURIComponent(variables.email);
+      router.push(`/otp?email=${encodedEmail}`);
+    },
+
+    onError: async (error) => {
+      toast.error(error?.message);
+    },
+  });
+
+  async function onSubmit(payload: FormType) {
+    try {
+      await mutateAsync(payload);
+    } catch (error) {
+      console.log(`error : ${error}`);
+    }
   }
 
   return (
@@ -75,7 +119,17 @@ const ForgotPasswordForm = () => {
           />
 
           <Button type="submit" className="w-full h-[50px]">
-            Send OTP
+            {isPending ? (
+              <span className="flex items-center gap-1">
+                <span>
+                  <Spinner />
+                </span>
+
+                <span>Send OTP</span>
+              </span>
+            ) : (
+              `Send OTP`
+            )}
           </Button>
 
           <div className="text-center">
