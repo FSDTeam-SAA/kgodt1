@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { useSearchFilter } from "../report-history/_components/zustand/useSearchFilter";
 import Link from "next/link";
+import NoSessions from "./no-sessions";
 
 // Session data type interface
 interface SessionData {
@@ -161,6 +162,8 @@ const SessionTable = () => {
     data?.meta?.totalPages ||
     Math.ceil((data?.meta?.total || 0) / itemsPerPage);
 
+  if (!data?.data || data.data.length === 0) return <NoSessions />;
+
   return (
     <div className="space-y-8">
       <div className="overflow-hidden rounded-lg border border-gray-200">
@@ -190,14 +193,6 @@ const SessionTable = () => {
                 <TableCell colSpan={6} className="py-8 text-center">
                   <div className="text-red-500 font-medium">
                     Error loading sessions. Please try again.
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : !data?.data || data.data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center">
-                  <div className="text-gray-500 font-medium">
-                    No sessions found.
                   </div>
                 </TableCell>
               </TableRow>

@@ -14,7 +14,6 @@ const page = () => {
       <States />
 
       <div className="min-h-[500px]">
-        <h1 className="text-xl">Recent Session Table</h1>
         <div className="mt-2">
           <SessionTable />
         </div>
