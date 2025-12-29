@@ -14,6 +14,7 @@ import { Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { useSearchFilter } from "../report-history/_components/zustand/useSearchFilter";
+import Link from "next/link";
 
 // Session data type interface
 interface SessionData {
@@ -229,22 +230,23 @@ const SessionTable = () => {
                   <TableCell
                     className={`${tableRowClass} opacity-100 flex items-center justify-center gap-4`}
                   >
-                    <button
-                      onClick={() => {
-                        console.log("View session:", session._id);
-                      }}
-                      className="hover:opacity-80 transition-opacity"
-                    >
-                      <Eye className="h-6 w-6 text-primary" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        console.log("Download session:", session._id);
-                      }}
-                      className="hover:opacity-80 transition-opacity"
-                    >
-                      <Download className="h-5 w-5 text-primary" />
-                    </button>
+                    <div>
+                      <Link href={`/report-history/${session?._id}`}>
+                        <button className="hover:opacity-80 transition-opacity">
+                          <Eye className="h-6 w-6 text-primary" />
+                        </button>
+                      </Link>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => {
+                          console.log("Download session:", session._id);
+                        }}
+                        className="hover:opacity-80 transition-opacity"
+                      >
+                        <Download className="h-5 w-5 text-primary" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
