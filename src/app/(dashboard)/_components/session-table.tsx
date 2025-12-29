@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
+import { useSearchFilter } from "../report-history/_components/zustand/useSearchFilter";
 
 // Session data type interface
 interface SessionData {
@@ -53,12 +54,13 @@ const SessionTable = () => {
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const status = session?.status;
+  const { search } = useSearchFilter();
 
   const { data, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: ["session-data", currentPage],
+    queryKey: ["session-data", currentPage, search],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session?page=${currentPage}&limit=${itemsPerPage}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session?search=${search}&page=${currentPage}&limit=${itemsPerPage}`,
         {
           method: "GET",
           headers: {
