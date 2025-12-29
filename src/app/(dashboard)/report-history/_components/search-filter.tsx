@@ -12,7 +12,8 @@ import {
 import { useSearchFilter } from "./zustand/useSearchFilter";
 
 const SearchFilter = () => {
-  const { searchTerm, setSearchTerm } = useSearchFilter();
+  const { searchTerm, riskLevel, setSearchTerm, setRiskLevel } =
+    useSearchFilter();
 
   return (
     <div className="flex items-center justify-between">
@@ -24,13 +25,17 @@ const SearchFilter = () => {
       />
 
       <div className="flex items-center gap-5">
-        <Select>
+        <Select
+          value={riskLevel || "all"}
+          onValueChange={(value) => setRiskLevel(value === "all" ? "" : value)}
+          defaultValue="all"
+        >
           <SelectTrigger className="w-[180px] bg-[#eaeaea] focus:ring-0 h-[50px]">
             <SelectValue placeholder="All Reports" />
           </SelectTrigger>
           <SelectContent className="bg-[#eaeaea]">
             <SelectGroup>
-              <SelectItem value="all-reports" className="cursor-pointer">
+              <SelectItem value="all" className="cursor-pointer">
                 All Reports
               </SelectItem>
               <SelectItem value="low" className="cursor-pointer">

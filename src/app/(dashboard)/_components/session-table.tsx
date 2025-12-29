@@ -56,13 +56,23 @@ const SessionTable = () => {
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const status = session?.status;
-  const { searchTerm } = useSearchFilter();
+  const { searchTerm, riskLevel } = useSearchFilter();
 
-  const { data, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: ["session-data", currentPage, searchTerm],
+  const { data, isLoading, error, isFetching } = useQuery<ApiResponse>({
+    queryKey: ["session-data", currentPage, searchTerm, riskLevel],
     queryFn: async () => {
+      const params = new URLSearchParams({
+        searchTerm,
+        page: String(currentPage),
+        limit: String(itemsPerPage),
+      });
+
+      if (riskLevel) {
+        params.append("riskLevel", riskLevel);
+      }
+
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session?searchTerm=${searchTerm}&page=${currentPage}&limit=${itemsPerPage}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -76,8 +86,7 @@ const SessionTable = () => {
         throw new Error("Failed to fetch sessions");
       }
 
-      const data = await res.json();
-      return data;
+      return res.json();
     },
     enabled: !!token && status === "authenticated",
   });
@@ -162,7 +171,47 @@ const SessionTable = () => {
     data?.meta?.totalPages ||
     Math.ceil((data?.meta?.total || 0) / itemsPerPage);
 
-  if (!data?.data || data.data.length === 0) return <NoSessions />;
+  if (isLoading || status === "loading" || isFetching) {
+    return (
+      <div className="space-y-8">
+        <div className="overflow-hidden rounded-lg border border-gray-200">
+          <Table>
+            <TableHeader className="bg-primary hover:bg-primary/90 h-[50px]">
+              <TableRow>
+                <TableHead className={`${tableHeaderClass}`}>
+                  Session ID
+                </TableHead>
+                <TableHead className={`${tableHeaderClass}`}>Date</TableHead>
+                <TableHead className={`${tableHeaderClass}`}>
+                  Summary Preview
+                </TableHead>
+                <TableHead className={`${tableHeaderClass}`}>Score</TableHead>
+                <TableHead className={`${tableHeaderClass}`}>
+                  Risk Level
+                </TableHead>
+                <TableHead className={`${tableHeaderClass}`}>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>{renderSkeletonRows()}</TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-8 text-center">
+        <div className="text-red-500 font-medium">
+          Error loading sessions. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoading && !error && data?.data && data.data.length === 0) {
+    return <NoSessions />;
+  }
 
   return (
     <div className="space-y-8">
@@ -186,71 +235,57 @@ const SessionTable = () => {
           </TableHeader>
 
           <TableBody>
-            {isLoading || status === "loading" ? (
-              renderSkeletonRows()
-            ) : error ? (
-              <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center">
-                  <div className="text-red-500 font-medium">
-                    Error loading sessions. Please try again.
+            {data?.data.map((session) => (
+              <TableRow key={session._id}>
+                <TableCell
+                  className={`${tableRowClass} text-primary font-semibold opacity-100`}
+                >
+                  {getSessionId(session._id)}
+                </TableCell>
+                <TableCell className={`${tableRowClass}`}>
+                  {formatDate(session.createdAt)}
+                </TableCell>
+                <TableCell className={`${tableRowClass} max-w-[200px] px-4`}>
+                  <div className="truncate" title={session.summaryReview}>
+                    {truncateSummary(session.summaryReview)}
+                  </div>
+                </TableCell>
+                <TableCell className={`${tableRowClass} font-bold opacity-100`}>
+                  {getScore(session) || "N/A"}
+                </TableCell>
+                <TableCell className={`${tableRowClass}`}>
+                  <button className={getRiskLevelStyles(session.riskLevel)}>
+                    {formatRiskLevel(session.riskLevel)}
+                  </button>
+                </TableCell>
+                <TableCell
+                  className={`${tableRowClass} opacity-100 flex items-center justify-center gap-4`}
+                >
+                  <div>
+                    <Link href={`/report-history/${session?._id}`}>
+                      <button className="hover:opacity-80 transition-opacity">
+                        <Eye className="h-6 w-6 text-primary" />
+                      </button>
+                    </Link>
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => {
+                        console.log("Download session:", session._id);
+                      }}
+                      className="hover:opacity-80 transition-opacity"
+                    >
+                      <Download className="h-5 w-5 text-primary" />
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>
-            ) : (
-              data.data.map((session) => (
-                <TableRow key={session._id}>
-                  <TableCell
-                    className={`${tableRowClass} text-primary font-semibold opacity-100`}
-                  >
-                    {getSessionId(session._id)}
-                  </TableCell>
-                  <TableCell className={`${tableRowClass}`}>
-                    {formatDate(session.createdAt)}
-                  </TableCell>
-                  <TableCell className={`${tableRowClass} max-w-[200px] px-4`}>
-                    <div className="truncate" title={session.summaryReview}>
-                      {truncateSummary(session.summaryReview)}
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={`${tableRowClass} font-bold opacity-100`}
-                  >
-                    {getScore(session) || "N/A"}
-                  </TableCell>
-                  <TableCell className={`${tableRowClass}`}>
-                    <button className={getRiskLevelStyles(session.riskLevel)}>
-                      {formatRiskLevel(session.riskLevel)}
-                    </button>
-                  </TableCell>
-                  <TableCell
-                    className={`${tableRowClass} opacity-100 flex items-center justify-center gap-4`}
-                  >
-                    <div>
-                      <Link href={`/report-history/${session?._id}`}>
-                        <button className="hover:opacity-80 transition-opacity">
-                          <Eye className="h-6 w-6 text-primary" />
-                        </button>
-                      </Link>
-                    </div>
-                    <div>
-                      <button
-                        onClick={() => {
-                          console.log("Download session:", session._id);
-                        }}
-                        className="hover:opacity-80 transition-opacity"
-                      >
-                        <Download className="h-5 w-5 text-primary" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </div>
 
-      {!isLoading && data?.meta && (
+      {data?.meta && (
         <div className="flex items-center justify-between">
           <div>
             <h1 className="opacity-60">
