@@ -66,6 +66,7 @@ const SessionDetails = () => {
         sessionId={sessionData?._id}
         createdAt={sessionData?.createdAt}
         riskLevel={sessionData?.riskLevel || aiData?.scores?.risk_level}
+        sessionData={sessionData}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

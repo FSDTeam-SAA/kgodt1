@@ -1,19 +1,24 @@
+"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import PdfGenerator from "./pdf-generator";
 
 interface SessionHeaderProps {
   sessionId: string;
   createdAt: string;
   riskLevel: string;
+  sessionData: any; // Add sessionData prop for PDF
 }
 
 const SessionHeader = ({
   sessionId,
   createdAt,
   riskLevel,
+  sessionData,
 }: SessionHeaderProps) => {
   const router = useRouter();
 
@@ -86,9 +91,8 @@ const SessionHeader = ({
         >
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
-        <Button className="bg-[#1E293B] text-white hover:bg-[#0F172A] gap-2">
-          <Download className="w-4 h-4" /> Download PDF
-        </Button>
+        {/* Replace with PdfGenerator */}
+        <PdfGenerator sessionData={sessionData} />
       </div>
     </div>
   );
