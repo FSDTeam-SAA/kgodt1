@@ -176,9 +176,9 @@ const PdfGenerator = ({ sessionData }: PdfGeneratorProps) => {
 
         // Add progress bar for alignment score
         if (label === "Alignment Score") {
-          const barWidth = 50;
-          const barX = xPos + 15;
-          const barY = rowY - 2;
+          const barWidth = 30;
+          const barX = xPos + 10;
+          const barY = rowY - 3;
 
           pdf.setDrawColor(226, 232, 240);
           pdf.setLineWidth(0.5);
