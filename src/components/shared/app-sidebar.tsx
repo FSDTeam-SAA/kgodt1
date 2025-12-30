@@ -5,6 +5,7 @@ import {
   LogOut,
   MessageCircleQuestionMark,
   Receipt,
+  Settings,
   SquarePlus,
 } from "lucide-react";
 
@@ -48,6 +49,11 @@ const items = [
     title: "Support",
     url: "/support",
     icon: MessageCircleQuestionMark,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
   },
 ];
 
