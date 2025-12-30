@@ -10,12 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { useSearchFilter } from "../report-history/_components/zustand/useSearchFilter";
 import Link from "next/link";
 import NoSessions from "./no-sessions";
+import { DeleteSession } from "./delete-session";
 
 // Session data type interface
 interface SessionData {
@@ -269,14 +270,7 @@ const SessionTable = () => {
                     </Link>
                   </div>
                   <div>
-                    <button
-                      onClick={() => {
-                        console.log("Download session:", session._id);
-                      }}
-                      className="hover:opacity-80 transition-opacity"
-                    >
-                      <Download className="h-5 w-5 text-primary" />
-                    </button>
+                    <DeleteSession id={session?._id} />
                   </div>
                 </TableCell>
               </TableRow>
