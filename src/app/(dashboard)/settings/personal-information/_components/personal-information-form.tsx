@@ -14,6 +14,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -36,6 +40,10 @@ const formSchema = z.object({
 });
 
 const PersonalInformationForm = () => {
+  const session = useSession();
+  const token = session?.data?.user?.accessToken;
+  const queryClient = useQueryClient();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,9 +57,43 @@ const PersonalInformationForm = () => {
     },
   });
 
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: ["profile-update"],
+    mutationFn: async (payload: z.infer<typeof formSchema>) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Something went wrong!");
+      }
+
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || "Profile Updated Successfully!");
+      queryClient.invalidateQueries({ queryKey: ["user-data"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await mutateAsync(values);
+    } catch (error) {
+      console.log(`error from update profile :  ${error}`);
+    }
   }
   return (
     <div className="h-full py-6 px-8 bg-white rounded-[8px] shadow-[0_4px_8px_rgba(0,0,0,0.12)]">
@@ -211,16 +253,27 @@ const PersonalInformationForm = () => {
                 type="button"
                 variant="outline"
                 onClick={() => form.reset()}
-                className="h-[47px] text-sm text-[#E5102E] leading-[120%] font-medium py-4 px-6 rounded-[6px] border border-[#E5102E]"
+                className="h-[50px] text-sm text-[#E5102E] leading-[120%] font-medium py-4 px-6 rounded-[6px] border border-[#E5102E]"
               >
                 Discard Changes
               </Button>
 
               <Button
-                className="h-[47px] text-sm text-[#F8F9FA] leading-[120%] font-medium py-4 px-6 rounded-[6px]"
+                disabled={isPending}
                 type="submit"
+                className="h-[50px] disabled:cursor-not-allowed"
               >
-                Save Changes
+                {isPending ? (
+                  <span className="flex items-center gap-1">
+                    <span>
+                      <Spinner />
+                    </span>
+
+                    <span>Save Changes</span>
+                  </span>
+                ) : (
+                  `Save Changes`
+                )}
               </Button>
             </div>
           </form>
