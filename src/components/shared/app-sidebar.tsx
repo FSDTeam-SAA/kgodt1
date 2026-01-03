@@ -120,7 +120,11 @@ export function AppSidebar() {
                       !data?.data?.lastName &&
                       "Jane Smith, RN"}
                   </h1>
-                  <p>{data?.data?.location || "MDS Coordinator"}</p>
+                  <p>
+                    {data?.data?.professionTitle || (
+                      <Link href={"/settings"} className="hover:underline">Add Professional Title</Link>
+                    )}
+                  </p>
                 </>
               )}
             </div>
