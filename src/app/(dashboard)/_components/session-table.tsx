@@ -57,7 +57,7 @@ const SessionTable = () => {
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const status = session?.status;
-  const { searchTerm, riskLevel, dateRange } = useSearchFilter();
+  const { searchTerm, sessionId, riskLevel, dateRange } = useSearchFilter();
 
   const { data, isLoading, error, isFetching } = useQuery<ApiResponse>({
     queryKey: ["session-data", currentPage, searchTerm, riskLevel, dateRange],
