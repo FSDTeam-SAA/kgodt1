@@ -19,10 +19,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton"; // Skeleton import করুন
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 
 const items = [
   {
@@ -59,25 +61,68 @@ const items = [
 
 export function AppSidebar() {
   const pathName = usePathname();
+  const session = useSession();
+  const token = session?.data?.user?.accessToken;
+  const status = session?.status;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["profile-img"],
+    queryFn: async () =>
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(async (res) => await res.json()),
+    enabled: !!token,
+  });
 
   return (
     <Sidebar>
       <SidebarContent className="bg-[#1c3345] text-white py-8">
         <SidebarGroup>
           <SidebarGroupLabel className="mb-10 gap-2">
-            <div className="h-16 w-16 rounded-full">
-              <Image
-                src={`/user_placeholder.png`}
-                alt="img.png"
-                width={1000}
-                height={1000}
-                className="h-full w-full object-cover rounded-full"
-              />
-            </div>
+            <Link href={`/settings`}>
+              <div className="h-16 w-16 rounded-full">
+                {isLoading ? (
+                  <Skeleton className="h-16 w-16 rounded-full bg-gray-700" />
+                ) : data?.data?.profileImage ? (
+                  <Image
+                    src={data.data.profileImage}
+                    alt="Profile"
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover rounded-full"
+                    priority
+                  />
+                ) : (
+                  <div className="h-full w-full bg-gray-600 rounded-full flex items-center justify-center">
+                    <span className="text-white">
+                      {data?.data?.firstName?.[0] || "J"}
+                      {data?.data?.lastName?.[0] || "S"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </Link>
 
             <div className="text-white">
-              <h1 className="text-xl">Jane Smith, RN</h1>
-              <p>MDS Coordinator</p>
+              {isLoading || status === "loading" ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-32 bg-gray-700" />
+                  <Skeleton className="h-4 w-24 bg-gray-700" />
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-xl">
+                    {data?.data?.firstName} {data?.data?.lastName}
+                    {!data?.data?.firstName &&
+                      !data?.data?.lastName &&
+                      "Jane Smith, RN"}
+                  </h1>
+                  <p>{data?.data?.location || "MDS Coordinator"}</p>
+                </>
+              )}
             </div>
           </SidebarGroupLabel>
 
