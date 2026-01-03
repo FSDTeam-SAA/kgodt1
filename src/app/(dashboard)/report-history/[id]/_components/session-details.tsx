@@ -61,7 +61,7 @@ const SessionDetails = () => {
   const complianceScore = scores?.compliance_score || 0;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div>
       <SessionHeader
         sessionId={sessionData?._id}
         createdAt={sessionData?.createdAt}
@@ -80,7 +80,7 @@ const SessionDetails = () => {
         </div>
 
         {/* Sidebar Content Area */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 sticky top-10 z-40 h-fit">
           <AlignmentScoreCard
             alignmentScore={alignmentScore}
             consistencyScore={consistencyScore}

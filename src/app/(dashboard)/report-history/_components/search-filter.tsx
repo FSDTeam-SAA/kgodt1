@@ -13,11 +13,10 @@ import { useSearchFilter } from "./zustand/useSearchFilter";
 
 const dateRangeOptions = [
   { value: "today", label: "Today" },
-  { value: "3-days", label: "Last 3 days" },
-  { value: "7-days", label: "Last 7 days" },
-  { value: "2-weeks", label: "Last 2 weeks" },
-  { value: "1-month", label: "Last 1 month" },
-  { value: "3-months", label: "Last 3 months" },
+  { value: "last3days", label: "Last 3 days" },
+  { value: "7days", label: "Last 7 days" },
+  { value: "2weeks", label: "Last 2 weeks" },
+  { value: "1month", label: "Last 1 month" },
   { value: "all", label: "All Time" },
 ];
 
@@ -37,7 +36,9 @@ const SearchFilter = () => {
         className="w-[400px] h-[50px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none bg-[#eaeaea]"
         placeholder="Search by Session ID or Date..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+        }}
       />
 
       <div className="flex items-center gap-5">

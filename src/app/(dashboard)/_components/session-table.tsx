@@ -21,6 +21,7 @@ import { DeleteSession } from "./delete-session";
 // Session data type interface
 interface SessionData {
   _id: string;
+  sessionId: string;
   score: number;
   riskLevel: string;
   summaryReview: string;
@@ -103,10 +104,6 @@ const SessionTable = () => {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const getSessionId = (id: string) => {
-    return `SES-${id.slice(-6).toUpperCase()}`;
   };
 
   const truncateSummary = (text: string, maxLength: number = 100) => {
@@ -238,7 +235,7 @@ const SessionTable = () => {
                 <TableCell
                   className={`${tableRowClass} text-primary font-semibold opacity-100`}
                 >
-                  {getSessionId(session._id)}
+                  {session?.sessionId || "N/A"}
                 </TableCell>
                 <TableCell className={`${tableRowClass}`}>
                   {formatDate(session.createdAt)}
@@ -249,7 +246,7 @@ const SessionTable = () => {
                   </div>
                 </TableCell>
                 <TableCell className={`${tableRowClass} font-bold opacity-100`}>
-                  {`${session?.score}%` || "N/A"}
+                  {session?.score === 0 ? "Not Calculated" : `${session.score}%`}
                 </TableCell>
                 <TableCell className={`${tableRowClass}`}>
                   <button className={getRiskLevelStyles(session.riskLevel)}>

@@ -15,6 +15,7 @@ const KeyObservationsCard = ({ summary }: KeyObservationsCardProps) => {
     { key: "clinical_impression", label: "Clinical Impression" },
     { key: "safety_concerns", label: "Safety Concerns" },
     { key: "follow_up", label: "Follow Up" },
+    { key: "brief_notes", label: "Brief Notes" },
   ];
 
   return (
@@ -31,20 +32,27 @@ const KeyObservationsCard = ({ summary }: KeyObservationsCardProps) => {
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
-          {summaryItems.map((item) => (
+          {summaryItems.map((item) =>
             summary[item.key] ? (
-              <li key={item.key} className="flex items-start gap-3 text-sm text-[#475569]">
+              <li
+                key={item.key}
+                className="flex items-start gap-3 text-sm text-[#475569]"
+              >
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#1E293B] flex-shrink-0" />
                 <span>
-                  <span className="font-medium text-[#334155]">{item.label}: </span>
+                  <span className="font-medium text-[#334155]">
+                    {item.label}:{" "}
+                  </span>
                   {summary[item.key]}
                 </span>
               </li>
             ) : null
-          ))}
+          )}
         </ul>
         {!Object.keys(summary).length && (
-          <p className="text-[#94A3B8] text-sm italic">No observations available</p>
+          <p className="text-[#94A3B8] text-sm italic">
+            No observations available
+          </p>
         )}
       </CardContent>
     </Card>
