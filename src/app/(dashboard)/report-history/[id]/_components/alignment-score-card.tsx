@@ -11,6 +11,8 @@ const AlignmentScoreCard = ({
   consistencyScore, 
   complianceScore 
 }: AlignmentScoreCardProps) => {
+  const showScore = alignmentScore > 0;
+  
   return (
     <Card className="border-[#E2E8F0] shadow-sm text-center">
       <CardHeader className="pb-2">
@@ -29,21 +31,33 @@ const AlignmentScoreCard = ({
               strokeWidth="12"
               fill="transparent"
             />
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              stroke="#EF4444"
-              strokeWidth="12"
-              fill="transparent"
-              strokeDasharray={440}
-              strokeDashoffset={440 - (440 * alignmentScore) / 100}
-              strokeLinecap="round"
-            />
+            {showScore && (
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                stroke="#EF4444"
+                strokeWidth="12"
+                fill="transparent"
+                strokeDasharray={440}
+                strokeDashoffset={440 - (440 * alignmentScore) / 100}
+                strokeLinecap="round"
+              />
+            )}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-bold text-[#1E293B]">{alignmentScore}%</span>
-            <span className="text-xs text-[#94A3B8]">/100</span>
+            {showScore ? (
+              <>
+                <span className="text-4xl font-bold text-[#1E293B]">
+                  {alignmentScore}%
+                </span>
+                <span className="text-xs text-[#94A3B8]">/100</span>
+              </>
+            ) : (
+              <span className="text-lg font-medium text-[#94A3B8] px-5 text-center">
+                Not Calculated
+              </span>
+            )}
           </div>
         </div>
         <div className="space-y-2 text-xs text-[#64748B]">
