@@ -246,7 +246,7 @@ const SessionTable = () => {
                   </div>
                 </TableCell>
                 <TableCell className={`${tableRowClass} font-bold opacity-100`}>
-                  {`${session?.score}%` || "N/A"}
+                  {session?.score === 0 ? "Not Calculated" : `${session.score}%`}
                 </TableCell>
                 <TableCell className={`${tableRowClass}`}>
                   <button className={getRiskLevelStyles(session.riskLevel)}>
