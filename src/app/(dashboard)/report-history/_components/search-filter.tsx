@@ -23,8 +23,6 @@ const dateRangeOptions = [
 const SearchFilter = () => {
   const {
     searchTerm,
-    sessionId,
-    setSessionId,
     riskLevel,
     setSearchTerm,
     setRiskLevel,
@@ -37,10 +35,9 @@ const SearchFilter = () => {
       <SearchInput
         className="w-[400px] h-[50px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none bg-[#eaeaea]"
         placeholder="Search by Session ID or Date..."
-        value={searchTerm || sessionId}
+        value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
-          setSessionId(e.target.value);
         }}
       />
 

@@ -21,6 +21,7 @@ import { DeleteSession } from "./delete-session";
 // Session data type interface
 interface SessionData {
   _id: string;
+  sessionId: string;
   score: number;
   riskLevel: string;
   summaryReview: string;
@@ -57,7 +58,7 @@ const SessionTable = () => {
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const status = session?.status;
-  const { searchTerm, sessionId, riskLevel, dateRange } = useSearchFilter();
+  const { searchTerm, riskLevel, dateRange } = useSearchFilter();
 
   const { data, isLoading, error, isFetching } = useQuery<ApiResponse>({
     queryKey: ["session-data", currentPage, searchTerm, riskLevel, dateRange],
@@ -103,10 +104,6 @@ const SessionTable = () => {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const getSessionId = (id: string) => {
-    return `SES-${id.slice(-6).toUpperCase()}`;
   };
 
   const truncateSummary = (text: string, maxLength: number = 100) => {
@@ -238,7 +235,7 @@ const SessionTable = () => {
                 <TableCell
                   className={`${tableRowClass} text-primary font-semibold opacity-100`}
                 >
-                  {getSessionId(session._id)}
+                  {session?.sessionId || "N/A"}
                 </TableCell>
                 <TableCell className={`${tableRowClass}`}>
                   {formatDate(session.createdAt)}
