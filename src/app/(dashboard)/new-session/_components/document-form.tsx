@@ -309,6 +309,12 @@ export function DocumentForm() {
             </div>
           )}
 
+          <div className="flex items-center gap-2">
+            <div className="w-1/2 border border-black/20"></div>
+            <div>OR</div>
+            <div className="w-1/2 border border-black/20"></div>
+          </div>
+
           {/* Uploaded Files Section */}
           <div className="space-y-5 px-1">
             <div className="flex items-center justify-between">
