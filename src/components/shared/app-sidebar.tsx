@@ -122,7 +122,9 @@ export function AppSidebar() {
                   </h1>
                   <p>
                     {data?.data?.professionTitle || (
-                      <Link href={"/settings"} className="hover:underline">Add Professional Title</Link>
+                      <Link href={"/settings"} className="hover:underline">
+                        Add Professional Title
+                      </Link>
                     )}
                   </p>
                 </>
@@ -134,7 +136,9 @@ export function AppSidebar() {
             <SidebarMenu className="flex flex-col justify-between min-h-[calc(100vh-180px)]">
               <div className="space-y-3">
                 {items.map((item) => {
-                  const isActive = pathName === item?.url;
+                  const isActive =
+                    pathName === item?.url ||
+                    pathName.startsWith(item?.url + "/");
 
                   return (
                     <SidebarMenuItem key={item.title}>
