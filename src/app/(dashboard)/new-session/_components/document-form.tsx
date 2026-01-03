@@ -434,28 +434,12 @@ export function DocumentForm() {
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
+                  Processing documents...
                 </span>
               ) : (
                 "Process Documents"
               )}
             </Button>
-
-            <div
-              className={cn(
-                "flex flex-col items-center justify-center space-y-4 transition-all duration-500",
-                isPending
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4 pointer-events-none"
-              )}
-            >
-              <div className="relative">
-                <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-              </div>
-              <p className="text-[15px] font-semibold text-slate-500 text-center">
-                Processing documents - this may take up to 20 seconds
-              </p>
-            </div>
           </div>
         </form>
       </Form>
