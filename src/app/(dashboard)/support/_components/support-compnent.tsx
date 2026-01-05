@@ -39,8 +39,8 @@ const SupportComponent = () => {
         <h1 className="text-2xl font-bold text-primary my-3">Get in Touch</h1>
 
         <p className="opacity-50">
-          For general questions or support, please email us directly we
-          typically response within 24 hours.
+          For general questions or support, please email us directly. We
+          typically respond within 24 hours.
         </p>
 
         <div className="my-8 flex items-center gap-2 text-primary font-medium">
