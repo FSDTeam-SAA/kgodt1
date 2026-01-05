@@ -15,18 +15,18 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface Invoice {
+import UpdateStatus from "./update-status";
+export interface Invoice {
   _id: string;
   invoiceId: string;
   createdAt: string;
   amount: number | string;
+  status: "pending" | "paid" | "draft";
 }
 
 const InvoiceHistory = () => {
   const tableHeaderClass = "text-center text-white font-medium";
   const tableRowClass = "h-[50px] text-center opacity-70 font-medium";
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const session = useSession();
   const status = session?.status;
@@ -113,7 +113,10 @@ const InvoiceHistory = () => {
               </span>
             </div>
             <div className="relative pt-1">
-              <Progress value={invoices?.length} className="h-2.5 bg-slate-100" />
+              <Progress
+                value={invoices?.length}
+                className="h-2.5 bg-slate-100"
+              />
             </div>
           </CardContent>
         </Card>
@@ -164,14 +167,16 @@ const InvoiceHistory = () => {
                     <TableCell className={tableRowClass}>
                       {item.amount}
                     </TableCell>
-                    <TableCell className={tableRowClass}>Paid</TableCell>
+                    <TableCell className={tableRowClass}>
+                      <UpdateStatus item={item} token={token as string} />
+                    </TableCell>
                     <TableCell
                       className={`${tableRowClass} flex items-center justify-center gap-2`}
                     >
-                      <button>
+                      <button className="p-1 hover:bg-gray-100 rounded">
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button>
+                      <button className="p-1 hover:bg-gray-100 rounded">
                         <Download className="h-4 w-4" />
                       </button>
                     </TableCell>
