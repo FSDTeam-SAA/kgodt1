@@ -52,7 +52,7 @@ const InvoiceHistory = () => {
                   <Eye />
                 </button>
 
-                <button className={tableRowClass}>
+                <button>
                   <Download />
                 </button>
               </TableCell>

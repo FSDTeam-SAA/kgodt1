@@ -51,6 +51,7 @@ export function CreateInvoice({ open, onOpenChange }: Props) {
     onSuccess: (data) => {
       toast.success(data?.message);
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      onOpenChange(false);
     },
     onError: (error) => {
       toast.error(error?.message);
