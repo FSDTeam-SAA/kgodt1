@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -6,18 +7,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Eye } from "lucide-react";
-import React from "react";
+import { Download, Eye, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { CreateInvoice } from "./create-invoice";
 
 const InvoiceHistory = () => {
   const tableHeaderClass = "text-center text-white font-medium";
   const tableRowClass = "h-[50px] text-center opacity-70 font-medium";
 
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-primary mb-4">
-        Invoice History
-      </h1>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-primary">Invoice History</h1>
+
+        <Button onClick={() => setIsOpen(true)} className="h-[45px]">
+          <Plus /> Create Invoice
+        </Button>
+      </div>
 
       <div className="overflow-hidden rounded-lg border border-gray-200">
         <Table>
@@ -51,6 +59,10 @@ const InvoiceHistory = () => {
             </TableRow>
           </TableBody>
         </Table>
+
+        {isOpen && (
+          <CreateInvoice open={isOpen} onOpenChange={() => setIsOpen(false)} />
+        )}
       </div>
     </div>
   );
