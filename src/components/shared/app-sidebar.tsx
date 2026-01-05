@@ -53,7 +53,7 @@ const items = [
     icon: MessageCircleQuestionMark,
   },
   {
-    title: "Settings",
+    title: "Profile Settings",
     url: "/settings",
     icon: Settings,
   },
