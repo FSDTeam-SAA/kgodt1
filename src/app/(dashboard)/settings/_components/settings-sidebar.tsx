@@ -31,8 +31,6 @@ const SettingSidebar = () => {
     enabled: !!token
   })
 
-  console.log(data)
-
   if (status === "loading" || isLoading) {
     return <SettingSidebarSkeleton />;
   }
