@@ -57,9 +57,6 @@ const PersonalInformationForm = () => {
     enabled: !!token,
   });
 
-  console.log("Fetched data: ", data?.data);
-
-  // Initialize form with empty values first
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -170,9 +167,6 @@ const PersonalInformationForm = () => {
                         value={field.value || ""}
                       />
                     </FormControl>
-                    <div className="text-sm text-gray-500">
-                      API Value: {data?.data?.firstName || "Not available"}
-                    </div>
                     <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
@@ -193,9 +187,6 @@ const PersonalInformationForm = () => {
                         value={field.value || ""}
                       />
                     </FormControl>
-                    <div className="text-sm text-gray-500">
-                      API Value: {data?.data?.lastName || "Not available"}
-                    </div>
                     <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
@@ -239,11 +230,9 @@ const PersonalInformationForm = () => {
                         {...field}
                         value={field.value || ""}
                         type="email"
+                        disabled
                       />
                     </FormControl>
-                    <div className="text-sm text-gray-500">
-                      API Value: {data?.data?.email || "Not available"}
-                    </div>
                     <FormMessage className="text-red-500" />
                   </FormItem>
                 )}

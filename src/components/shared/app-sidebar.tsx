@@ -66,7 +66,7 @@ export function AppSidebar() {
   const status = session?.status;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["profile-img"],
+    queryKey: ["user-data"],
     queryFn: async () =>
       await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`, {
         method: "GET",
