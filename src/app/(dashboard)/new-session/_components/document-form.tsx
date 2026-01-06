@@ -70,18 +70,88 @@ export function DocumentForm() {
     },
   });
 
+  // Document upload mutation
+  const documentMutation = useMutation({
+    mutationKey: ["new-session"],
+    mutationFn: async (formData: FormData) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Something went wrong!");
+      }
+
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      setIsSuccess(true);
+      setId(data?.data?._id);
+      setFiles([]);
+      form.reset();
+      setShowRawText(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Raw text mutation
+  const textMutation = useMutation({
+    mutationKey: ["new-session-text"],
+    mutationFn: async (textData: { text: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session/text`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(textData),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Something went wrong!");
+      }
+
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      setIsSuccess(true);
+      setId(data?.data?._id);
+      setFiles([]);
+      form.reset();
+      setShowRawText(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   // Drag and drop event handlers
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
+    if (!showRawText) {
+      setIsDragging(true);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Check if leaving the drop zone
     if (
       dropZoneRef.current &&
       !dropZoneRef.current.contains(e.relatedTarget as Node)
@@ -93,12 +163,20 @@ export function DocumentForm() {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
+    if (!showRawText) {
+      setIsDragging(true);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (showRawText) {
+      toast.error("Please clear text input first to upload files");
+      return;
+    }
+    
     setIsDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -124,7 +202,6 @@ export function DocumentForm() {
         return;
       }
 
-      // Check for duplicate files
       const isDuplicate = files.some(
         (existingFile) =>
           existingFile.name === file.name &&
@@ -156,9 +233,14 @@ export function DocumentForm() {
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (showRawText) {
+      toast.error("Please clear text input first to upload files");
+      e.target.value = "";
+      return;
+    }
+    
     if (e.target.files && e.target.files.length > 0) {
       processFiles(Array.from(e.target.files));
-      // Reset input to allow selecting same file again
       e.target.value = "";
     }
   };
@@ -167,57 +249,50 @@ export function DocumentForm() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const { mutateAsync, isPending } = useMutation({
-    mutationKey: ["new-session"],
-    mutationFn: async (formData: FormData) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/session`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Something went wrong!");
-      }
-
-      return await res.json();
-    },
-
-    onSuccess: (data) => {
-      setIsSuccess(true);
-      setId(data?.data?._id);
-      setFiles([]);
-      form.reset();
-      setShowRawText(false);
-    },
-
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
   async function onSubmit(values: FormType) {
     try {
-      const formData = new FormData();
-      files.forEach((fileObj) => {
-        formData.append("uploads", fileObj.file);
-      });
-
-      if (values.notes?.trim()) {
-        formData.append("notes", values.notes);
+      if (files.length > 0 && showRawText && values.notes?.trim()) {
+        toast.error("Please choose either files or text, not both");
+        return;
       }
 
-      await mutateAsync(formData);
+      if (files.length > 0) {
+        // Use document upload API
+        const formData = new FormData();
+        files.forEach((fileObj) => {
+          formData.append("uploads", fileObj.file);
+        });
+
+        if (values.notes?.trim()) {
+          formData.append("notes", values.notes);
+        }
+
+        await documentMutation.mutateAsync(formData);
+      } else if (showRawText && values.notes?.trim()) {
+        // Use raw text API
+        await textMutation.mutateAsync({ text: values.notes });
+      } else {
+        toast.error("Please upload files or enter text");
+      }
     } catch (error) {
       console.error("Error from upload session:", error);
     }
   }
+
+  const handleShowRawText = () => {
+    if (files.length > 0) {
+      toast.error("Please remove uploaded files first to use text input");
+      return;
+    }
+    setShowRawText(true);
+  };
+
+  const handleCloseRawText = () => {
+    setShowRawText(false);
+    form.setValue("notes", "");
+  };
+
+  const isPending = documentMutation.isPending || textMutation.isPending;
 
   return (
     <div>
@@ -229,10 +304,14 @@ export function DocumentForm() {
               <div
                 ref={dropZoneRef}
                 className={cn(
-                  "relative group cursor-pointer transition-all duration-200",
-                  isDragging && "scale-[0.98]"
+                  "relative group transition-all duration-200",
+                  !showRawText ? "cursor-pointer" : "cursor-not-allowed opacity-60"
                 )}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  if (!showRawText) {
+                    fileInputRef.current?.click();
+                  }
+                }}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
@@ -241,7 +320,9 @@ export function DocumentForm() {
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-xl bg-white p-12 transition-all duration-200",
-                    isDragging
+                    showRawText
+                      ? "border-slate-200 bg-slate-50"
+                      : isDragging
                       ? "border-blue-500 bg-blue-50/30 border-solid scale-[1.02]"
                       : "border-slate-300 group-hover:border-slate-400 group-hover:bg-slate-50/50"
                   )}
@@ -250,7 +331,11 @@ export function DocumentForm() {
                     <div
                       className={cn(
                         "transition-colors duration-200",
-                        isDragging ? "text-blue-500" : "text-slate-700"
+                        showRawText
+                          ? "text-slate-400"
+                          : isDragging
+                          ? "text-blue-500"
+                          : "text-slate-700"
                       )}
                     >
                       <Upload className="w-8 h-8" strokeWidth={2.5} />
@@ -259,12 +344,16 @@ export function DocumentForm() {
                       <h3
                         className={cn(
                           "text-xl font-semibold tracking-tight transition-colors duration-200",
-                          isDragging
+                          showRawText
+                            ? "text-slate-400"
+                            : isDragging
                             ? "text-blue-600"
                             : "text-slate-800 group-hover:text-slate-900"
                         )}
                       >
-                        {isDragging
+                        {showRawText
+                          ? "Text input active - file upload disabled"
+                          : isDragging
                           ? "Drop files here"
                           : "Drag & drop files here or click to browse"}
                       </h3>
@@ -275,7 +364,7 @@ export function DocumentForm() {
                         Supports : PDF, DOCX, TXT, JPG, PNG (Max 20 MB)
                       </p>
                     </div>
-                    {!isDragging && (
+                    {!isDragging && !showRawText && (
                       <Button
                         type="button"
                         variant="secondary"
@@ -293,13 +382,14 @@ export function DocumentForm() {
                   multiple
                   onChange={onFileChange}
                   accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp"
+                  disabled={showRawText}
                 />
               </div>
             </div>
           </div>
 
-          {/* OR Divider */}
-          {files.length > 0 && (
+          {/* OR Divider - Show only when there are files */}
+          {files.length > 0 && !showRawText && (
             <div className="relative flex items-center px-4">
               <div className="flex-grow border-t border-slate-200"></div>
               <span className="flex-shrink mx-6 text-sm font-medium text-slate-500 uppercase tracking-widest">
@@ -309,11 +399,14 @@ export function DocumentForm() {
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            <div className="w-1/2 border border-black/20"></div>
-            <div>OR</div>
-            <div className="w-1/2 border border-black/20"></div>
-          </div>
+          {/* OR Divider for empty state */}
+          {files.length === 0 && !showRawText && (
+            <div className="flex items-center gap-2">
+              <div className="w-1/2 border border-black/20"></div>
+              <div className="text-sm text-slate-500">OR</div>
+              <div className="w-1/2 border border-black/20"></div>
+            </div>
+          )}
 
           {/* Uploaded Files Section */}
           <div className="space-y-5 px-1">
@@ -369,7 +462,7 @@ export function DocumentForm() {
                     </button>
                   </div>
                 ))
-              ) : (
+              ) : !showRawText ? (
                 <div className="text-center py-8">
                   <p className="mb-4 opacity-50 font-medium">
                     No Files Uploaded
@@ -378,7 +471,7 @@ export function DocumentForm() {
                     Upload files or paste raw text below
                   </p>
                 </div>
-              )}
+              ) : null}
 
               {/* Manual Input Entry */}
               {showRawText ? (
@@ -392,14 +485,12 @@ export function DocumentForm() {
                           <Textarea
                             placeholder="Paste your notes here..."
                             className="min-h-[150px] bg-white border-slate-200 rounded-xl p-4 focus:ring-slate-400 shadow-sm"
+                            disabled={files.length > 0}
                             {...field}
                           />
                           <button
                             type="button"
-                            onClick={() => {
-                              setShowRawText(false);
-                              form.setValue("notes", "");
-                            }}
+                            onClick={handleCloseRawText}
                             className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600"
                           >
                             <X className="w-4 h-4" />
@@ -410,10 +501,10 @@ export function DocumentForm() {
                     </FormItem>
                   )}
                 />
-              ) : (
+              ) : files.length === 0 ? (
                 <button
                   type="button"
-                  onClick={() => setShowRawText(true)}
+                  onClick={handleShowRawText}
                   className="w-full flex items-center space-x-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all text-left"
                 >
                   <div className="bg-slate-100 p-2.5 rounded-lg text-slate-600">
@@ -423,7 +514,7 @@ export function DocumentForm() {
                     Paste raw text notes manually
                   </span>
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
@@ -440,10 +531,10 @@ export function DocumentForm() {
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing documents...
+                  Processing...
                 </span>
               ) : (
-                "Process Documents"
+                files.length > 0 ? "Process Documents" : "Process Text"
               )}
             </Button>
           </div>
