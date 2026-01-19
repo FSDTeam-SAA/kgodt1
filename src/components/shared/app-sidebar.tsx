@@ -88,7 +88,7 @@ export function AppSidebar() {
                   <Skeleton className="h-16 w-16 rounded-full bg-gray-700" />
                 ) : data?.data?.profileImage ? (
                   <Image
-                    src={data.data.profileImage}
+                    src={data.data.profileImage || "/user_placeholder.png"}
                     alt="Profile"
                     width={64}
                     height={64}
